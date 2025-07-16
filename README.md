@@ -6,12 +6,14 @@ My solutions for the exercises of the [University of Helsinki](https://www.helsi
 ### Part 0: Fundamentals of Web apps
 - The basics of web development and also the advances in web application development during the last few decades. It includes topics such as web application structure, HTTP protocol, developer tools, traditional web applications, AJAX, single-page apps and JavaScript libraries.
 
+### Part 1: Introduction to React
+- Familiarizing with the React-library and some features of JavaScript that are important for understanding React.
 
 ## My course progress
 
 | Part           | Status      | Exercises |
 | :------------: | :---------: | :-------: |
-| [0](./part_0/) | In Progress | 0/6       |
+| [0](./part_0/) | Done        | 06/06     |
 | [1](./part_1/) | In Progress | 00/14     |
 | [2](./part_2/) | In Progress | 00/20     |
 | [3](./part_3/) | In Progress | 00/22     |
