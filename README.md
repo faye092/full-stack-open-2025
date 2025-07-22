@@ -9,6 +9,9 @@ My solutions for the exercises of the [University of Helsinki](https://www.helsi
 ### Part 1: Introduction to React
 - Familiarizing with the React-library and some features of JavaScript that are important for understanding React.
 
+### Part 2: Communicating with server
+- Continuation of the introduction to React. It includes data rendering, data submit with HTML forms, fetching data from remote backend server and simple CSS styles.
+
 ## My course progress
 
 | Part           | Status      | Exercises |
