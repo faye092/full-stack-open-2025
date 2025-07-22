@@ -1,6 +1,5 @@
 import { useState } from 'react'
 
-
 const Button = ({handleClick, feedback}) => {
   <button onClick={handleClick}>{feedback}</button>
 }
