@@ -14,7 +14,7 @@ My solutions for the exercises of the [University of Helsinki](https://www.helsi
 | Part           | Status      | Exercises |
 | :------------: | :---------: | :-------: |
 | [0](./part_0/) | Done        | 06/06     |
-| [1](./part_1/) | In Progress | 00/14     |
+| [1](./part_1/) | Done        | 14/14     |
 | [2](./part_2/) | In Progress | 00/20     |
 | [3](./part_3/) | In Progress | 00/22     |
 | [4](./part_4/) | In Progress | 00/23     |
