@@ -1,141 +1,156 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
-
-const Filter = ({filterName, handleFilterChange}) => {
-  return (
-    <div>
-      filter shown with 
-      <input 
-      value={filterName}
-      onChange={handleFilterChange}
-      />
-    </div>
-  )
-}
-
-const PersonForm = ({addPerson, newName, handleNameChange, newNumber, handleNumberChange}) => {
-  return(
-    <form onSubmit={addPerson}>
-        <div>
-          name: <input 
-            value={newName}
-            onChange={handleNameChange}
-          />
-        </div>
-        <div>
-          number: <input 
-            value={newNumber}
-            onChange={handleNumberChange}
-          />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
-  )
-}
-
-const Person = ({person}) => {
-  return(
-    <div>
-      {person.name} {person.number}
-    </div>
-  )
-}
-
-const Persons = ({personsToShow}) => {
-  return(
-    <>
-      {personsToShow.map(person => 
-        <Person key={person.id} person={person}/>
-      )}
-    </>
-  )
-}
+import personServices from './services/persons'
+import Filter from './components/Filter'
+import PersonForm from './components/PersonForm'
+import Notification from './components/Notification'
+import Persons from './components/Persons'
 
 const App = () => {
-  const [persons, setPersons] = useState([]) 
-  const [newName, setNewName] = useState('')
-  const [newNumber, setNewNumber] = useState('')
+  const [allPersons, setAllPersons] = useState([]) 
+  const [newPerson, setNewPerson] = useState({name:'',number:''})
   const [filterName, setFilterName] = useState('')
-
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [notification, setNotification] = useState(null)
 
   useEffect(()=> {
     console.log('effect: fetching persons data')
-    setLoading(true)
-    setError(null)
-    axios
-      .get('http://localhost:5174/persons')
-      .then(response => {
-        console.log('promise fulfilled: persons data received')
-        setPersons(response.data)
-        setLoading(false)
-      })
-      .catch(error => {
-        console.error('Error fetching persons data:', error)
-        setLoading(false)
-        setError('Failed to load phonebook data. Please ensure JSON Server is running.')
-      })
+    personServices.getAll().then((persons) => {
+      setAllPersons(persons)
+    })
   }, [])
 
-  const handleNameChange = (event) => {
-    setNewName(event.target.value)  
-  }
+  useEffect(() => {
+    if(notification){
+      const timer = setTimeout(() => {
+        setNotification(null)
+      },4000)
+      return () => {
+        clearTimeout(timer)
+      }
+    }
+  },[notification])
 
-  const handleNumberChange = (event) => {
-    setNewNumber(event.target.value)
+  const handleFormChange = ({target: {name, value}}) => {
+    setNewPerson((newPerson) => ({
+      ...newPerson,
+      [name]: value
+    }))
   }
 
   const handleFilterChange = (event) => {
     setFilterName(event.target.value)
   }
-
-  const addPerson = (event) => {
+  
+  const handleSubmit = (event) => {
     event.preventDefault()
-    
-    const nameExists = persons.some(person => person.name === newName)
-
-    if(nameExists){
-      alert(`${newName} is already added to phonebook`)
-    }else{
-      const personObject = {
-       name: newName,
-       number: newNumber
-
+    const result = allPersons.findIndex(
+      (person) => person.name === newPerson.name.trim()
+    )
+    if(result === -1) {
+      personServices
+        .create(newPerson)
+        .then((person) => {
+          setAllPersons((prevPersons) => prevPersons.concat(person))
+          setNewPerson({name:'',number:''})
+          setNotification({
+            type:'success',
+            text:`${person.name} was successfully added`
+          })
+        })
+        .catch((error) => {
+          setNotification({
+            type:'error',
+            text: error.response?.data?.error|| "unknown error"
+          })
+        })
+    } else {
+      if (
+        window.confirm(
+          `${newPerson.name} is already added to phonebook, replace the old number with a new one?`
+        )
+      ) {
+        const personToUpdate = allPersons[result]
+        personServices
+          .update(personToUpdate.id, {...newPerson, id:personToUpdate.id})
+          .then((updatedPerson) => {
+            setAllPersons((prevPersons) => 
+              prevPersons.map((person) => 
+                person.id !== updatedPerson.id? person : updatedPerson
+              )
+            )
+            setNewPerson({name:'', number:''})
+            setNotification({
+              type:'success',
+              text:`${newPerson.name} was successfully updated` 
+            })
+          })
+          .catch((error) => {
+            if(error.response?.status === 404){
+              setAllPersons((prevPersons) => 
+                prevPersons.filter((person) => person.id !== result.id)
+              )
+              setNotification({
+                type: 'error',
+                text:`Information of ${newPerson.name} has already removed from server`
+              })
+            } else {
+              setNotification({
+                type: 'error',
+                text: error.response?.data?.error || "unknown error"
+              })
+            }
+          })
       }
-      setPersons(persons.concat(personObject))
     }
-    setNewName('')
-    setNewNumber('')
   }
 
-  const filterPersons = persons.filter(person =>
-    person.name.toLowerCase().includes(filterName.toLowerCase())
-  )
+  const handleRemove = (id, name) => { 
+  if(window.confirm(`Delete ${name}?`)){ 
+    personServices.getDeletePerson(id) 
+      .then(()=>{ 
+        setAllPersons((prevPersons) =>       
+          prevPersons.filter((person) => person.id !== id)
+        )
+        setNotification({
+          type:'success',
+          text:`${name} was successfully deleted`
+        })
+      })
+      .catch((error) => { 
+        if (error.response?.status === 404) {
+            setAllPersons((prevPersons) =>
+                prevPersons.filter((person) => person.id !== id)
+            );
+            setNotification({
+                type: 'error',
+                text: `Information of ${name} was already removed from server.`
+            });
+        } else {
+            setNotification({
+                type: 'error',
+                text: `Failed to delete ${name}. ${error.response?.data?.error || "Unknown error"}`
+            });
+        }
+      })
+  }
+}
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification notification={notification}/>
       <Filter filterName={filterName} handleFilterChange={handleFilterChange}/>
       <h3>add a new</h3>
       <PersonForm 
-        addPerson={addPerson}
-        newName={newName}
-        handleNameChange={handleNameChange}
-        newNumber={newNumber}
-        handleNumberChange={handleNumberChange}
+        newPerson={newPerson}
+        handleSubmit={handleSubmit}
+        handleFormChange={handleFormChange}
       />
       <h2>Numbers</h2>
-      {loading ? (
-        <div>Loading phonebook data</div>
-      ): error ? (
-        <div style={{color: 'red'}}> Error: {error}</div>
-      ) : (
-        <Persons personsToShow={filterPersons}/>
-      )}
-      
+      <Persons 
+        filterName={filterName}
+        allPersons={allPersons}
+        handleRemove={handleRemove}
+      />  
     </div>
   )
 }
