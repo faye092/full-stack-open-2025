@@ -1,12 +1,3 @@
-# React + Vite
+## Full Stack Phonebook Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+In this part, I developed a simple backend for a phonebook application using Node.js and Express.js. The backend is connected to a MongoDB database, where the application data is stored. My phonebook application is deployed to the Fly.io platform, where the backend provides REST endpoints and serves the React frontend I developed in [part 2](../part_2/phonebook/). You can access my phonebook application [here](https://).

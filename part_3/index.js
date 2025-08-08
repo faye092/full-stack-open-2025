@@ -1,6 +1,24 @@
 const express = require('express')
+const morgan = require('morgan')
+const cors = require('cors')
+const path = require('path')
+
 const app = express()
+
 app.use(express.json())
+app.use(express.static('build'))
+
+morgan.token('body',(req) => 
+    req.method === 'POST' && req.body && Object.keys(req.body).length
+        ? JSON.stringify(req.body)
+        : ''
+)
+app.use(morgan('tiny'))
+app.use(morgan('tiny:body', {
+    skip:(req) => req.method !== 'POST'
+}))
+
+app.use(cors())
 
 let persons = [
     {
@@ -25,49 +43,48 @@ let persons = [
     }
 ]
 
-app.get('/api/persons',(request, response) => {
-    response.json(persons)
+app.get('/api/persons',(req, res) => res.json(persons))
+
+app.get('/api/persons/:id',(req, res) => {
+    const id = Number(req.params.id)
+    const person = persons.find(person => person.id === id)
+
+    if (!person) return res.status(404).json({error:'person not found'})
+    res.json(person)
 })
 
-app.get('/info',(request, response)=> {
-    const date = new Date()
-    const numberOfEntries = persons.length
+app.get('/info',(req, res)=> {
     const infoPage = `
-      <p>Phonebook has info for ${numberOfEntries} people</p>
-      <p> ${date} </p>  
+      <p>Phonebook has info for ${persons.length} people</p>
+      <p> ${new Date()} </p>  
     `
-    response.send(infoPage)
+    res.send(infoPage)
 })
 
-app.get('/api/persons/:id',(request, response) => {
+app.delete('/api/persons/:id',(req, res) => {
     const id = Number(request.params.id)
-    const person = persons.find(person=> person.id === id)
+    if(Number.isNaN(id))
+        return res.status(400).json({error:'invalid id'})
 
-    if(person) {
-        response.json(person)
-    } else {
-        response.status(404).end()
-    }
+    const before = persons.length
+    persons = persons.filter(person => person.id !== id)
+    if(persons.length === before)
+        return res.status(404).json({error:'person not found'})
+    
+    res.status(204).end()
 })
 
-app.delete('/api/persons/:id',(request, response) => {
-    const id = Number(request.params.id)
-    persons = persons.filter(person=>person.id === id)
-
-    response.status(204).end()
-})
-
-app.post('/api/persons', (request, response) => {
-    const body = request.body
+app.post('/api/persons', (req, res) => {
+    const body = req.body
     if(!body.name || !body.number){
-        return response.status(400).json({
+        return res.status(400).json({
             error:'name or number is missing'
         })
     }
 
     const nameExists = persons.find(person => person.name === body.name)
     if(nameExists){
-        return response.status(400).json({
+        return res.status(400).json({
             error:'name must be unique'
         })
     }
@@ -78,11 +95,17 @@ app.post('/api/persons', (request, response) => {
         number: body.number
     }
     persons = persons.concat(newPerson)
-    response.json(newPerson)
+    res.status(201).location(`/api/persons/${newId}`).json(newPerson)
 })
 
-const PORT = 3001
+const unknownEndpoint = (req, res) => {
+    res.status(404).send({ error: 'unknown endpoint'})
+}
 
-app.listen(PORT, ()=>{
+app.use(unknownEndpoint)
+
+const PORT = process.env.PORT || 8080
+
+app.listen(PORT, '0.0.0.0',()=>{
     console.log(`Server running on port ${PORT}`)
 })

@@ -1,14 +1,21 @@
 {
   "dependencies": {
-    "express": "^5.1.0"
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "morgan": "^1.10.1"
   },
   "name": "phonebook-backend",
   "version": "1.0.0",
   "main": "index.js",
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.7.10",
     "nodemon": "^3.1.10"
   },
   "scripts": {
+    "build:ui": "rm -rf frontend && cd ../part_2/phonebook/ && npm run build && cp -r dist ../../part_3/frontend",
+    "deploy": "fly deploy",
+    "deploy:full": "npm run build:ui && npm run deploy",
+    "logs:prod": "fly logs",
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
