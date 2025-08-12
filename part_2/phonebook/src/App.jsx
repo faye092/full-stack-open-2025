@@ -105,7 +105,7 @@ const App = () => {
 
   const handleRemove = (id, name) => { 
   if(window.confirm(`Delete ${name}?`)){ 
-    personServices.getDeletePerson(id) 
+    personServices.remove(id) 
       .then(()=>{ 
         setAllPersons((prevPersons) =>       
           prevPersons.filter((person) => person.id !== id)

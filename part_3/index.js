@@ -113,12 +113,27 @@ app.get('/info', (req, res) => {
   })
 })
 
-
 const unknownEndpoint = (req, res) => {
     res.status(404).send({ error: 'unknown endpoint'})
 }
 
 app.use(unknownEndpoint)
+
+const errorHandler = (error, req, res, next) => {
+    console.error('error.name:', error.name)
+    console.error('error.message', error.message)
+
+    if(error.name === 'CastError'){
+        return res.status(400).send({ error:'malformatted id'})
+    } else if(error.name === 'ValidationError'){
+        return res.status(400).json({error: error.message})
+    }
+
+    return res.status(500).json({error:'Internal server error'})
+}
+
+app.use(errorHandler)
+
 
 const PORT = process.env.PORT || 8080
 
