@@ -12,6 +12,9 @@ My solutions for the exercises of the [University of Helsinki](https://www.helsi
 ### Part 2: Communicating with server
 - Continuation of the introduction to React. It includes data rendering, data submit with HTML forms, fetching data from remote backend server and simple CSS styles.
 
+### Part 3: Programming a server with NodeJS and Express
+- Focuses on implementing and deploying a simple REST API to the internet. The application is developed by using Node.js and the Express library. The application data is stored in a MongoDB database.
+
 ## My course progress
 
 | Part           | Status      | Exercises |
@@ -19,7 +22,7 @@ My solutions for the exercises of the [University of Helsinki](https://www.helsi
 | [0](./part_0/) | Done        | 06/06     |
 | [1](./part_1/) | Done        | 14/14     |
 | [2](./part_2/) | Done        | 20/20     |
-| [3](./part_3/) | In Progress | 18/22     |
+| [3](./part_3/) | In Progress | 22/22     |
 | [4](./part_4/) | In Progress | 00/23     |
 | [5](./part_5/) | In Progress | 00/23     |
 | [6](./part_6/) | In Progress | 00/24     |
