@@ -1,7 +1,10 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/person')
 const path = require('path')
+const { request } = require('http')
 
 const app = express()
 
@@ -14,89 +17,102 @@ morgan.token('body',(req) =>
         : ''
 )
 app.use(morgan('tiny'))
-app.use(morgan('tiny:body', {
+app.use(morgan('tiny :body', {
     skip:(req) => req.method !== 'POST'
 }))
 
 app.use(cors())
 
-let persons = [
-    {
-      "id": 1,
-      "name": "Arto Hellas",
-      "number": "040-123456"
-    },
-    {
-      "id": 2,
-      "name": "Ada Lovelace",
-      "number": "39-44-5323523"
-    },
-    {
-      "id": 3,
-      "name": "Dan Abramov",
-      "number": "12-43-234345"
-    },
-    {
-      "id": 4,
-      "name": "Mary Poppendieck",
-      "number": "39-23-6423122"
-    }
-]
-
-app.get('/api/persons',(req, res) => res.json(persons))
-
-app.get('/api/persons/:id',(req, res) => {
-    const id = Number(req.params.id)
-    const person = persons.find(person => person.id === id)
-
-    if (!person) return res.status(404).json({error:'person not found'})
-    res.json(person)
+app.get('/api/persons',(req, res) => {
+    Person.find({}).then((persons) => {
+        res.json(persons)
+    })
 })
 
-app.get('/info',(req, res)=> {
-    const infoPage = `
-      <p>Phonebook has info for ${persons.length} people</p>
-      <p> ${new Date()} </p>  
-    `
-    res.send(infoPage)
-})
+app.post('/api/persons', (req, res, next) => {
+    const { name, number } = req.body
 
-app.delete('/api/persons/:id',(req, res) => {
-    const id = Number(request.params.id)
-    if(Number.isNaN(id))
-        return res.status(400).json({error:'invalid id'})
-
-    const before = persons.length
-    persons = persons.filter(person => person.id !== id)
-    if(persons.length === before)
-        return res.status(404).json({error:'person not found'})
-    
-    res.status(204).end()
-})
-
-app.post('/api/persons', (req, res) => {
-    const body = req.body
-    if(!body.name || !body.number){
+    if(!name && !number){
         return res.status(400).json({
-            error:'name or number is missing'
+            error: 'name and number missing'
         })
     }
 
-    const nameExists = persons.find(person => person.name === body.name)
-    if(nameExists){
+    if(!name){
         return res.status(400).json({
-            error:'name must be unique'
+            error:'name missing'
         })
     }
-    const newId = Math.floor(Math.random()*100000000)
-    const newPerson = {
-        id: newId,
-        name: body.name,
-        number: body.number
+
+    if(!number){
+        return res.status(400).json({
+            error:'number missing'
+        })
     }
-    persons = persons.concat(newPerson)
-    res.status(201).location(`/api/persons/${newId}`).json(newPerson)
+
+    const person = new Person({
+        name,
+        number
+    })
+    person
+      .save()
+      .then(savedPerson => {
+        res.json(savedPerson)
+      })
+      .catch((error) => {
+        next(error)
+      })
 })
+
+app.get('/api/persons/:id',(req, res, next) => {
+    Person.findById(req.params.id)
+      .then((person) => {
+        if(person){
+            res.json(person)
+        }else{
+            res.status(404).end()
+        }
+      })
+      .catch((error) => next(error))
+})
+
+app.put('/api/persons/:id', (req, res, next) => {
+    const {name, number} = req.body
+    const person = {
+        name,
+        number
+    }
+    Person.findByIdAndUpdate(req.params.id, person, {
+        new: true,
+        runValidators: true,
+        context: 'query'
+    })
+      .then((updatedPerson) => {
+        if(!updatedPerson){
+            return res.status(404).end()
+        }
+        res.json(updatedPerson)
+      })
+      .catch((error) => next(error))
+})
+
+app.delete('/api/persons/:id',(req, res, next) => {
+    Person.findByIdAndDelete(req.params.id)
+      .then(() => {
+        res.status(204).end()
+      })
+      .catch((error) => next(error))
+})
+
+app.get('/info', (req, res) => {
+  Person.find({}).then((persons) => {
+    res.send(
+      `<p>Phonebook has info for ${persons.length} people</p>
+      <p>${new Date()}</p>`
+    )
+  })
+})
+
 
 const unknownEndpoint = (req, res) => {
     res.status(404).send({ error: 'unknown endpoint'})
