@@ -1,25 +1,24 @@
 {
-  "name": "notebackend",
-  "version": "0.0.1",
+  "name": "part_4",
+  "version": "1.0.0",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "node --watch index.js",
-    "lint": "eslint .",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Matti Luukkainen",
-  "license": "MIT",
-  "description": "",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
   "dependencies": {
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "mongoose": "^8.11.0"
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "mongoose": "^8.17.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.22.0",
-    "@stylistic/eslint-plugin-js": "^4.2.0",
-    "eslint": "^9.22.0",
-    "globals": "^16.0.0"
+    "dotenv": "^17.2.1",
+    "nodemon": "^3.1.10"
   }
 }
