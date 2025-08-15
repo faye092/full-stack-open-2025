@@ -1,25 +1,28 @@
 {
   "name": "part_4",
   "version": "1.0.0",
-  "description": "",
+  "description": "Blog list app",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cros-env NODE_ENV=development nodemon index.js",
+    "test": "cross-env NODE_ENV=test jest --verbose --runInBand"
   },
   "keywords": [],
-  "author": "",
+  "author": "Faye Liao",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
     "cors": "^2.8.5",
+    "cross-env": "^10.0.0",
     "express": "^5.1.0",
+    "express-async-errors": "^3.1.1",
     "lodash": "^4.17.21",
     "mongoose": "^8.17.1"
   },
   "devDependencies": {
     "dotenv": "^17.2.1",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "supertest": "^7.1.4"
   }
 }

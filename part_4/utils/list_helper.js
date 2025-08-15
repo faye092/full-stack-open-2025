@@ -50,6 +50,7 @@ const mostLikes = (blogs) => {
     if (!blogs || blogs.length === 0) {
         return null
     }
+
     const authorsTotalLikes = _.map(
         _.groupBy(blogs, 'author'),
         (authorBlogs, author) => ({
@@ -61,3 +62,4 @@ const mostLikes = (blogs) => {
 }
 
 module.exports = { dummy, totalLikes, favoriteBlog, mostBlogs, mostLikes }
+
