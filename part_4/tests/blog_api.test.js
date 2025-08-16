@@ -37,12 +37,12 @@ describe('GET /api/blogs', () => {
 
 describe('POST /api/blogs', () => {
     test('creates a new blog', async () => {
-        const start = await helper.blogInDb()
+        const start = await helper.blogsInDb()
         await api.post('/api/blogs')
           .send({title:'New Post', author:'Faye', url:'http://x.com', likes: 3})
           .expect(201)
           .expect('Content-Type', /json/)
-        const end = await helper.blogInDb()
+        const end = await helper.blogsInDb()
         assert.strictEqual(end.length, start.length + 1)
         assert.ok(end.map(b => b.title).includes('New Post'))
     })
@@ -66,6 +66,44 @@ describe('POST /api/blogs', () => {
           .expect(400)
     })
     
+})
+
+describe('updating of a blog', () => {
+    test('shold update details of an existing blog successfully', async ()=> {
+        const blogsAtStart = await helper.blogsInDb()
+        const blogToBeUpdated = { ...blogsAtStart[0] }
+        blogToBeUpdated.likes++
+
+        await api
+          .put(`/api/blogs/${blogToBeUpdated.id}`)
+          .send(blogToBeUpdated)
+          .expect(200)
+        
+        const blogsAtEnd = await helper.blogsInDb()
+        expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length)
+
+        const updatedBlog = blogsAtEnd.find(
+            (blog) => blog.id === blogToBeUpdated.id
+        )
+        expect(updatedBlog).toEqual(blogToBeUpdated)
+    })
+})
+
+describe('deletion of a blog', () => {
+    test('succeeds with status code 204 if id is valid' , async () => {
+        const blogsAtStart = await helper.blogsInDb()
+        const blogToDelete = blogsAtStart[0]
+
+        await api
+          .delete(`/api/notes/${blogToDelete.id}`)
+          .expect(204)
+        
+        const blogsAtEnd = await helper.blogsInDb()
+        assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length -1)
+
+        const contents = blogsAtEnd.map(r => r.content)
+        assert(!contents.includes(blogToDelete.content))
+    })
 })
 
 after(async () => {
