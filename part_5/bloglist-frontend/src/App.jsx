@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
+import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
@@ -11,6 +12,7 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -18,20 +20,42 @@ const App = () => {
     )  
   }, [])
 
-  const handleLogin = (event) => {
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      blogService.setToken(user.token)
+    }
+  }, [])
+
+  const handleLogin = async event => {
     event.preventDefault()
-    console.log('logging in with', username, password)
+    try {
+      const user = await loginService.login({ username, password})
+
+      window.localStorage.setItem(
+        'loggedBlogappUser', JSON.stringify(user)
+      )
+      blogService.setToken(user.token)
+      setUser(user)
+      setUsername('')
+      setPassword('')
+    } catch {
+      setErrorMessage('wrong credentials')
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
   }
 
-  return (
-    <div>
-      <h2>blogs</h2>
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
-      )}
+  const handleLogout = () => {
+    window.localStorage.clear()
+    setUser(null)
+  }
 
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
+  const loginForm = () => {
+    <form onSubmit={handleLogin}>
         <div>
           <label>
             username
@@ -54,6 +78,46 @@ const App = () => {
         </div>
         <button type='submit'>login</button>
       </form>
+  }
+
+  const blogForm = () => {
+    <form onSubmit={addBlog}>
+      <input value={newBlog} onChange={handleBlogChange} />
+      <button type='submit'>save</button>
+    </form>
+  }
+
+  return (
+    <div>
+      <h2>blogs</h2>
+      
+      <Notification message={errorMessage}/>
+
+      {!user && loginForm()}
+      {user && (
+        <div>
+          <p>{user.name} logged in</p>
+           {blogForm()}
+        </div>
+      )}
+      <button type='submit' onClick={handleLogout}>logout</button>
+
+      <div>
+        <button onClick={() => setShowAll(!showAll)}>
+          show {showAll ? 'important' : 'all'}
+        </button>
+      </div>
+      {/* <ul>
+        {blogsToShow.map(blog =>(
+          <Blog 
+            key={blog.id} 
+            blog={blog} 
+            toggleImportance={() => toggleImportanceOf(note.id)}
+          />
+        ))}
+      </ul> */}
+      
+      {/* <Footer /> */}
     </div>
   )
 }
