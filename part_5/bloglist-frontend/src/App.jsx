@@ -1,24 +1,30 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
 import Notification from './components/Notification'
+import LoginForm from './components/LoginForm'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import Togglable from './components/Togglable'
 
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [newBlog, setNewBlog] = useState('')
-  const [showAll, setShowAll] = useState(true)
-  const [errorMessage, setErrorMessage] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [changeMessage, setChangeMessage] = useState(null)
+  const [refreshBlog, setRefreshBlog] = useState(false)
+  const [newBlog, setNewBlog] = useState('')
+  const [showAll, setShowAll] = useState(true)
+  const blogFormRef = useRef()
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
+    blogService.getAll().then(blogs =>{
+      blogs.sort((a,b) => b.likes -a.likes)
       setBlogs( blogs )
-    )  
-  }, [])
+    })  
+  }, [refreshBlog])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
@@ -29,7 +35,7 @@ const App = () => {
     }
   }, [])
 
-  const handleLogin = async event => {
+  const handleLogin = async (event) => {
     event.preventDefault()
     try {
       const user = await loginService.login({ username, password})
@@ -41,8 +47,8 @@ const App = () => {
       setUser(user)
       setUsername('')
       setPassword('')
-    } catch {
-      setErrorMessage('wrong credentials')
+    } catch (exception){
+      setErrorMessage('wrong username or password')
       setTimeout(() => {
         setErrorMessage(null)
       }, 5000)
@@ -54,72 +60,52 @@ const App = () => {
     setUser(null)
   }
 
-  const loginForm = () => {
-    <form onSubmit={handleLogin}>
-        <div>
-          <label>
+  const addBlog = (blogObject) => {
+    blogFormRef.current.toggleVisibility()
+    blogService
+      .create(blogObject)
+      .then(returnedBlog => {
+        setBlogs(blogs.concat(returnedBlog))
+        setChangeMessage(`a new blog ${blogObject.title} by ${blogObject.author} added`)
+        setRefreshBlog(!refreshBlog)
+        setTimeout(() => {
+          setChangeMessage(null)
+        }, 5000)
+      })
+  }
+
+  const addLikes = async(id, blogObject) => {
+    await blogService.update(id, blogObject)
+    setRefreshBlog(!refreshBlog)
+  }
+
+  const deleteBlog = async id => {
+    await blogService.remove(id)
+    setRefreshBlog(!refreshBlog)
+  }
+
+  if (user === null) {
+    return(
+      <div>
+        <h2>Log in to application</h2>
+        <Notification message={errorMessage}/>
+        <form onSubmit={handleLogin}>
+          <div>
             username
             <input 
               type="text" 
               value={username}
+              name='Username'
               onChange={({target}) => setUsername(target.value)}
+              id='username'
             />
-          </label>
-        </div>
-        <div>
-          <label>
-            password
-            <input 
-              type="text" 
-              value={password}
-              onChange={({target}) => setPassword(target.value)}
-            />
-          </label>
-        </div>
-        <button type='submit'>login</button>
-      </form>
-  }
-
-  const blogForm = () => {
-    <form onSubmit={addBlog}>
-      <input value={newBlog} onChange={handleBlogChange} />
-      <button type='submit'>save</button>
-    </form>
-  }
-
-  return (
-    <div>
-      <h2>blogs</h2>
-      
-      <Notification message={errorMessage}/>
-
-      {!user && loginForm()}
-      {user && (
-        <div>
-          <p>{user.name} logged in</p>
-           {blogForm()}
-        </div>
-      )}
-      <button type='submit' onClick={handleLogout}>logout</button>
-
-      <div>
-        <button onClick={() => setShowAll(!showAll)}>
-          show {showAll ? 'important' : 'all'}
-        </button>
+          </div>
+        </form>
       </div>
-      {/* <ul>
-        {blogsToShow.map(blog =>(
-          <Blog 
-            key={blog.id} 
-            blog={blog} 
-            toggleImportance={() => toggleImportanceOf(note.id)}
-          />
-        ))}
-      </ul> */}
-      
-      {/* <Footer /> */}
-    </div>
-  )
+    )
+  }
+  
+  
 }
 
 export default App
