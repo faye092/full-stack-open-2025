@@ -100,12 +100,36 @@ const App = () => {
               id='username'
             />
           </div>
+          <div>
+            password
+            <input 
+              type="text"
+              value={password}
+              name='Password'  
+              onChange={({target}) => setPassword(target.value)}
+              id='password'
+            />
+          </div>
+          <button type='submit' id='login-button'>login</button>
         </form>
       </div>
     )
   }
   
-  
+  return (
+    <div>
+      <h2>blogs</h2>
+      <Notification message={changeMessage}/>
+      <p>{user.name} logged in</p>
+      <button type='submit' onClick={handleLogout}>logout</button>
+      <Togglable buttonLabel="create new blog" ref = {blogFormRef}>
+        <blogForm createBlog={addBlog}/>
+      </Togglable>
+      {blogs.map(blog => 
+        <Blog key={blog.id} blog={blog} addLikes={addLikes} deleteBlog={deleteBlog} user={user}/>
+      )}
+    </div>
+  )
 }
 
 export default App
