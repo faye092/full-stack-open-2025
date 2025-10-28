@@ -1,0 +1,31 @@
+{
+  "name": "part_4",
+  "version": "1.0.0",
+  "description": "Blog list app",
+  "main": "index.js",
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cros-env NODE_ENV=development node --watch index.js",
+    "test": "cross-env NODE_ENV=test jest node --test",
+    "lint": "eslint .",
+    "start:test":"cross-env NODE_ENV=test node --watch index.js"
+  },
+  "keywords": [],
+  "author": "Faye Liao",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "cross-env": "^10.0.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21",
+    "mongoose": "^8.17.1"
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.1",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.1.4"
+  }
+}
