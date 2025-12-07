@@ -12,14 +12,6 @@ const anecdoteSlice = createSlice({
     },
     //2. record vote changes
     updateAnecdote(state, action){
-      // const id = action.payload
-      // //find the vote which need to be revised
-      // const anecdoteToChange = state.find(n => n.id === id)
-      // //copy it, and make notes + 1
-      // const changedAnecdote = {
-      //   ...anecdoteToChange,
-      //   votes: anecdoteToChange.votes + 1
-      // }
       const changedAnecdote = action.payload
       return state.map(n => n.id !== changedAnecdote.id ? n : changedAnecdote
       )
