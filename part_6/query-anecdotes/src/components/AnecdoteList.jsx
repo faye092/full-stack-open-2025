@@ -12,9 +12,18 @@ const AnecdoteList = () => {
         retry: 1
     })
     //update the mutation
-    const updateAnecdoteMutation = useMutation(updateAnecdote, {
-        onSuccess:() => {
-        queryClient.invalidateQueries({ queryKey: ['anecdotes']})
+    const updateAnecdoteMutation = useMutation({
+        mutationFn: updateAnecdote,
+        //when it is success
+        onSuccess:(updatedAnecdote) => {
+          queryClient.invalidateQueries({ queryKey: ['anecdotes']})
+
+          //show the notification
+          dispatch({ type:'SET', payload:`anecdote '${updatedAnecdote.content}' voted`})
+          //clear out the notification after 5 second
+          setTimeout(() => {
+              dispatch({ type: 'CLEAR'})
+          }, 5000)
         }
     })
 

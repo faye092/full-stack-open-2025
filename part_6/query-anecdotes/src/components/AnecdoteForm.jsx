@@ -23,7 +23,7 @@ const AnecdoteForm = () => {
     },
 
     //when it is failed
-    onError:() => {
+    onError:(error) => {
       const errorMessage = error.response?.data?.error || 'Unknown Error'
       dispatch({ type: 'SET', payload: errorMessage})
 
