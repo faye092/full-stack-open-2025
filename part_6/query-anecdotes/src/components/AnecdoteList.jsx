@@ -1,8 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query'
 import { getAnecdotes, updateAnecdote } from '../requests'
+import { useNotificationDispatch } from '../NotificationContext'
 
 const AnecdoteList = () => {
     const queryClient = useQueryClient()
+    const dispatch = useNotificationDispatch()
 
     const result = useQuery({
         queryKey: ['anecdotes'],
