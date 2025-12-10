@@ -24,7 +24,7 @@ const AnecdoteForm = () => {
 
     //when it is failed
     onError:(error) => {
-      const errorMessage = error.response?.data?.error || 'Unknown Error'
+      const errorMessage = error.response?.data?.error || 'Too short anecdote, must have length 5 or more'
       dispatch({ type: 'SET', payload: errorMessage})
 
       setTimeout(() => {
