@@ -2,7 +2,7 @@ import { useState } from 'react'
 import {
   Routes, Route, Link, useMatch, useParams, useNavigate
 } from "react-router-dom"
-import { useField, useCountry } from './hooks'
+import { useField, useCountry, useResource } from './hooks'
 
 const Menu = () => {
   const padding = {
@@ -141,7 +141,6 @@ const Country = ({country}) => {
     )
   }
 
-
 const App = () => {
   const [anecdotes, setAnecdotes] = useState([
     {
@@ -203,6 +202,23 @@ const App = () => {
     setName(nameInput.value)
   }
 
+  const content = useField('text')
+  const personName = useField('text')
+  const number = useField('text')
+
+  const [notes, noteService] = useResource('http://localhost:3005/notes')
+  const [persons, personService] = useResource('http://localhost:3005/persons')
+
+  const handleNoteSubmit = (event) => {
+    event.preventDefault()
+    noteService.create({content: content.value})
+  }
+
+  const handlePersonSubmit = (event) => {
+    event.preventDefault()
+    personService.create({ personName: personName.value, number: number.value})
+  }
+
   return (
     <div>
       <h1>Software anecdotes</h1>
@@ -212,6 +228,21 @@ const App = () => {
         <button>find</button>
       </form>
       <Country country={country}/>
+
+      <h2>notes</h2>
+      <form onSubmit={handleNoteSubmit}>
+        <input {...content}/>
+        <button>create</button>
+      </form>
+      {notes.map(n => <p key={n.id}>{n.content}</p>)}
+
+      <h2>persons</h2>
+      <form onSubmit={handlePersonSubmit}>
+        personName <input {...personName}/> <br/>
+        number <input {...number}/>
+        <button>create</button>
+      </form>
+      {persons.map(n => <p key={n.id}>{n.personName} {n.number}</p>)}
 
       {notification && 
         <div style={{border:'1px solid red', padding:10, marginBottom:10}}>

@@ -43,3 +43,30 @@ export const useCountry = (name) => {
     return country
 }
 
+export const useResource = (baseUrl) => {
+    const [resources, setResources] = useState([])
+
+    useEffect(() => {
+        axios
+          .get(baseUrl)
+          .then(response => {
+            setResources(response.data)
+          })
+          .catch(error => {
+            console.error('Error fetching data:', error)
+          })
+    }, [baseUrl])
+
+    const create = async(resources) => {
+        const response = await axios.post(baseUrl,resources)
+        setResources(resources.concat(response.data))
+
+        return response.data
+    }
+
+    const service = {
+        create
+    }
+
+    return [resources, service]
+}
