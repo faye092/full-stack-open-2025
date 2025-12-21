@@ -2,6 +2,7 @@ import { useState } from 'react'
 import {
   Routes, Route, Link, useMatch, useParams, useNavigate
 } from "react-router-dom"
+import { useField, useCountry } from './hooks'
 
 const Menu = () => {
   const padding = {
@@ -72,21 +73,28 @@ const Anecdote = ({anecdote}) => {
 
 
 const CreateNew = (props) => {
-  const [content, setContent] = useState('')
-  const [author, setAuthor] = useState('')
-  const [info, setInfo] = useState('')
+  const {reset: resetContent, ...content} = useField('text')
+  const {reset: resetAuthor, ...author} = useField('text')
+  const {reset: resetInfo, ...info} = useField('text')
   
   const navigate = useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault()
     props.addNew({
-      content,
-      author,
-      info,
+      content:content.value,
+      author:author.value,
+      info:info.value,
       votes: 0
     })
     navigate('/')
+  }
+
+  const handleReset = (e) => {
+    e.preventDefault()
+    resetContent()
+    resetAuthor()
+    resetInfo()
   }
 
   return (
@@ -95,22 +103,44 @@ const CreateNew = (props) => {
       <form onSubmit={handleSubmit}>
         <div>
           content
-          <input name='content' value={content} onChange={(e) => setContent(e.target.value)} />
+          <input {...content} />
         </div>
         <div>
           author
-          <input name='author' value={author} onChange={(e) => setAuthor(e.target.value)} />
+          <input {...author} />
         </div>
         <div>
           url for more info
-          <input name='info' value={info} onChange={(e)=> setInfo(e.target.value)} />
+          <input {...info} />
         </div>
         <button>create</button>
+        <button onClick={handleReset}>reset</button>
       </form>
     </div>
   )
-
 }
+
+const Country = ({country}) => {
+    if (!country) {
+      return null
+    }
+    if (!country.found) {
+      return (
+        <div>
+          not found...
+        </div>
+    )
+    }
+    return (
+      <div>
+        <h3>{country.data.name.common} </h3>
+        <div>capital {country.data.capital} </div>
+        <div>population {country.data.population}</div> 
+        <img src={country.data.flags.png} height='100' alt={`flag of ${country.data.name.common}`}/> 
+      </div>
+    )
+  }
+
 
 const App = () => {
   const [anecdotes, setAnecdotes] = useState([
@@ -129,11 +159,13 @@ const App = () => {
       id: 2
     }
   ])
+  
 
   const [notification, setNotification] = useState('')
+ 
 
   const addNew = (anecdote) => {
-    anecdote.id = (Math.random() * 10000).toFixed(0)
+    anecdote.id = Math.round(Math.random() * 10000)
     setAnecdotes(anecdotes.concat(anecdote))
 
     setNotification(`a new anecdote '${anecdote.content}' created!`)
@@ -162,10 +194,24 @@ const App = () => {
     ? anecdotes.find(anecdote => anecdote.id === Number(match.params.id))
     : null
 
+  const nameInput = useField('text')
+  const [name, setName] = useState('')
+
+  const country = useCountry(name)
+  const fetch = (e) => {
+    e.preventDefault()
+    setName(nameInput.value)
+  }
+
   return (
     <div>
       <h1>Software anecdotes</h1>
       <Menu />
+      <form onSubmit={fetch}>
+        <input {...nameInput} />
+        <button>find</button>
+      </form>
+      <Country country={country}/>
 
       {notification && 
         <div style={{border:'1px solid red', padding:10, marginBottom:10}}>
