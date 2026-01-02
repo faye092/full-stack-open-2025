@@ -17,6 +17,7 @@ import blogs from './services/blogs'
 const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+
   const user = useSelector(state => state.user)
   const blogs = useSelector(state => state.blogs) || []
 
@@ -94,29 +95,13 @@ const App = () => {
       <div>
         <h2>Log in to application</h2>
         <Notification />
-        <form onSubmit={handleLogin}>
-          <div>
-            username
-            <input 
-              type="text" 
-              value={username}
-              name='Username'
-              onChange={({target}) => setUsername(target.value)}
-              id='username'
-            />
-          </div>
-          <div>
-            password
-            <input 
-              type="text"
-              value={password}
-              name='Password'  
-              onChange={({target}) => setPassword(target.value)}
-              id='password'
-            />
-          </div>
-          <button type='submit' id='login-button'>login</button>
-        </form>
+        <LoginForm 
+          username={username}
+          password={password}
+          handleUsernameChange={({ target }) => setUsername(target.value)}
+          handlePasswordChange={({ target }) => setPassword(target.value)}
+          handleSubmit={handleLogin}
+        />
       </div>
     )
   }
