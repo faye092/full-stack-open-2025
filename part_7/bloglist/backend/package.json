@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "cross-env NODE_ENV=production node index.js",
-    "dev": "cros-env NODE_ENV=development node --watch index.js",
+    "dev": "cross-env NODE_ENV=development node --watch index.js",
     "test": "cross-env NODE_ENV=test jest node --test",
     "lint": "eslint .",
     "start:test": "cross-env NODE_ENV=test node --watch index.js"
@@ -22,7 +22,9 @@
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "middleware": "^1.0.0",
-    "mongoose": "^8.19.2"
+    "mongodb": "^7.0.0",
+    "mongoose": "^8.19.2",
+    "mongoose-unique-validator": "^5.0.1"
   },
   "devDependencies": {
     "dotenv": "^17.2.1",
