@@ -54,8 +54,8 @@ const App = () => {
   }
 
   const handleLogout = () => {
-    window.localStorage.clear()
-    dispatch(setUser(user))
+    window.localStorage.removeItem('loggedBlogappUser')
+    dispatch(clearUser())
   }
 
   const addBlog = async (blogObject) => {
@@ -111,7 +111,7 @@ const App = () => {
       <h2>blogs</h2>
       <Notification />
       <p>{user.name} logged in</p>
-      <button type='submit' onClick={handleLogout}>logout</button>
+      <button onClick={handleLogout}>logout</button>
       <Togglable buttonLabel="create new blog" ref = {blogFormRef}>
         <BlogForm createBlog={addBlog}/>
       </Togglable>
