@@ -14,7 +14,7 @@ const BlogView = ({blog}) => {
 
     const handleRemove = () => {
         if(window.confirm(`Remove blog ${blog.title}?`)){
-            dispatch(removeBlog(blog))
+            dispatch(removeBlog(blog.id))
             navigate('/')
         }
     }

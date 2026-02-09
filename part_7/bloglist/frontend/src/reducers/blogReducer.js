@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import blogService from '../services/blogs'
+import { setNotification } from './notificationReducer'
 
 const blogSlice = createSlice({
     name:'blogs',
@@ -59,8 +60,21 @@ export const likeBlog = (blog) => {
 //remove blog
 export const removeBlog = (id) => {
     return async dispatch => {
-        await blogService.remove(id)
-        dispatch(removeBlogState(id))
+        // await blogService.remove(id)
+        // dispatch(removeBlogState(id))
+        try {
+            await blogService.remove(id)
+            dispatch(removeBlogState(id))
+            dispatch(setNotification('Blog removed', 5))
+        } catch (error) {
+            console.log('Delete error:', error)
+            if (error.response && error.response.status === 404) {
+                dispatch(removeBlogState(id))
+                dispatch(setNotification('Blog was already removed from server', 5))
+            } else {
+                dispatch(setNotification('Failed to remove blog', 5))
+            }
+        }
     }
 }
 

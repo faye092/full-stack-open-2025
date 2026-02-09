@@ -11,7 +11,7 @@ blogsRouter.get('/',async (req, res) => {
 })
 
 blogsRouter.post('/', userExtractor, async (req, res) => {
-    const { user } = req
+    const user = req.user
     if(!user) {
       return res.status(401).json({error:'token invalid'})
     }
@@ -25,7 +25,7 @@ blogsRouter.post('/', userExtractor, async (req, res) => {
       author,
       url,
       likes: likes ?? 0,
-      user: user
+      user: user._id
     })
     const savedBlog = await blog.save()
     user.blogs = user.blogs.concat(savedBlog._id)
@@ -34,7 +34,7 @@ blogsRouter.post('/', userExtractor, async (req, res) => {
     res.status(201).json(savedBlog)
 })
 
-blogsRouter.put('/', userExtractor, async(req, res) => {
+blogsRouter.put('/:id', userExtractor, async(req, res) => {
   const {title, author, url, likes} = req.body
 
   const updatedBlog = await Blog.findByIdAndUpdate(
@@ -46,21 +46,25 @@ blogsRouter.put('/', userExtractor, async(req, res) => {
   res.json(updatedBlog)
 } )
 
-blogsRouter.delete('/', userExtractor, async(req, res) => {
-  const { user } = req.body
+blogsRouter.delete('/:id', userExtractor, async(req, res) => {
+  const user = req.user
 
-  if(!user) {
-    return res.status(401).json({error:'token invalid'})
+  if (!user) {
+    return res.status(402).json({ error: 'token missing or invalid' })
   }
 
   const blog = await Blog.findById(req.params.id)
 
-  if(blog?.user.toString() === user.id.toString()){
+  if (!blog) {
+    return res.status(204).end()
+  }
+
+  if(blog.user.toString() === user.id.toString()){
     await Blog.findByIdAndDelete(req.params.id)
     res.status(204).end()
   }
   else{
-    res.status(401).json({error:'unauthorized access'})
+    res.status(401).json({error:'only the creator can delete blogs'})
   }
 })
 
